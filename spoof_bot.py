@@ -1,7 +1,6 @@
 import random
 import numpy as np
 import io
-import asyncio
 import logging
 from PIL import Image, ImageEnhance, ImageFilter
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -168,26 +167,23 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 BOT_TOKEN = "8089313407:AAHF1dRzX4ahU485tag1vujOp9opo0NvG6M"  # ⬅️ replace with your actual bot token
 
-async def main():
-    logger.info("Starting bot")
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+# Create the Application and pass it your bot's token.
+application = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # Set commands
-    await app.bot.set_my_commands([
-        ("start", "Start and choose how many variations you want")
-    ])
+# Add handlers
+application.add_handler(CommandHandler("start", start))
+application.add_handler(CallbackQueryHandler(handle_count_selection, pattern=r"^count_"))
+application.add_handler(CallbackQueryHandler(handle_choice, pattern=r"^choose_"))
+application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(handle_count_selection, pattern=r"^count_"))
-    app.add_handler(CallbackQueryHandler(handle_choice, pattern=r"^choose_"))
-    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-
-    logger.info("🤖 Bot is running...")
-    await app.run_polling()
-
+# For Render deployment - don't use asyncio.run()
 if __name__ == "__main__":
-    try:
-        # This is the key change for Render
-        asyncio.run(main())
-    except Exception as e:
-        logger.error(f"Fatal error: {e}", exc_info=True)
+    logger.info("🤖 Bot starting...")
+    
+    # Set commands - using a different approach for Render
+    from telegram.ext import Application
+    Application.initialize(application)
+    application.bot.set_my_commands([("start", "Start and choose how many variations you want")])
+    
+    logger.info("🤖 Bot is running...")
+    application.run_polling()
