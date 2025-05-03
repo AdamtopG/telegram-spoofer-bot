@@ -107,7 +107,7 @@ async def handle_varcount_choice(update: Update, context: ContextTypes.DEFAULT_T
     await query.answer()
     count = int(query.data.replace("varcount_", ""))
     context.user_data["variation_count"] = count
-    await query.edit_message_text(f"✅ Great, send me a photo and I’ll give you {count} variations!")
+    await query.edit_message_text(f"✅ Great, send me a photo and I'll give you {count} variations!")
 
 # Handle the photo
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -151,19 +151,9 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error("Error in handle_choice", exc_info=True)
         await query.message.reply_text("⚠️ Failed to load your selection.")
 
-# Final launch
-async def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(handle_varcount_choice, pattern=r"varcount_\d+"))
-    app.add_handler(CallbackQueryHandler(handle_choice, pattern=r"choose_\d+"))
-    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-
-    await app.bot.set_my_commands([("start", "Start the bot and choose image variation count")])
-    logger.info("🤖 Bot is running...")
-    await app.run_polling()
-
-# ✅ For Render: don’t wrap this in asyncio.run()
-import asyncio
-asyncio.get_event_loop().create_task(main())
+# Properly run the bot on Render
+if __name__ == "__main__":
+    import asyncio
+    
+    # This is the key change - we run the event loop with the main function
+    asyncio.run(main())
