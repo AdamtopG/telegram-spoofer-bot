@@ -165,7 +165,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --------- Main ---------
 
-BOT_TOKEN = "8089313407:AAHF1dRzX4ahU485tag1vujOp9opo0NvG6M"  # ⬅️ replace with your actual bot token
+BOT_TOKEN = "8089313407:AAGjiyQ1chkHOMqfC3b4slX9jSV5Sz9DBw0"  # ⬅️ replace with your actual bot token
 
 # Create the Application and pass it your bot's token.
 application = ApplicationBuilder().token(BOT_TOKEN).build()
