@@ -111,29 +111,33 @@ async def handle_count_selection(update: Update, context: ContextTypes.DEFAULT_T
     except:
         await update.callback_query.message.reply_text("❌ Invalid choice. Please /start again.")
 
-# --- Photo handler ---
+# --- Photo handler (fixed) ---
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not (count := context.user_data.get("variation_count")):
-        return await update.message.reply_text("⚠️ Please use /start first to pick a variation count.")
+        return await update.message.reply_text(
+            "⚠️ Please use /start first to pick a variation count."
+        )
 
+    # Await the coroutine to get the File object
     photo = update.message.photo[-1]
-    bio   = io.BytesIO()
-    await photo.get_file().download_to_memory(out=bio)
-    raw   = bio.getvalue()
+    tg_file = await photo.get_file()
+
+    # Download as bytes directly
+    raw = await tg_file.download_as_bytearray()
 
     variations = generate_variations(raw, variation_count=count)
     context.user_data["variations"] = variations
 
+    # Send each variation back
     for idx, v in enumerate(variations, start=1):
-        stream = io.BytesIO(v)
-        await update.message.reply_photo(photo=stream, caption=f"Variation {idx}")
+        await update.message.reply_photo(photo=io.BytesIO(v), caption=f"Variation {idx}")
 
-    # Buttons to choose final
+    # Provide buttons to choose one
     buttons = [
         [InlineKeyboardButton(f"Choose #{i}", callback_data=f"choose_{i-1}")]
         for i in range(1, count+1)
     ]
-    await update.message.reply_text("👇 Select your favorite", 
+    await update.message.reply_text("👇 Select your favorite:", 
                                     reply_markup=InlineKeyboardMarkup(buttons))
 
 async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -143,11 +147,9 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not variations or idx < 0 or idx >= len(variations):
         return await update.callback_query.message.reply_text("⚠️ Variation expired. Try /start again.")
 
-    stream = io.BytesIO(variations[idx])
     await update.callback_query.message.reply_photo(
-        photo=stream, caption=f"✅ You picked variation #{idx+1}"
+        photo=io.BytesIO(variations[idx]), caption=f"✅ You picked variation #{idx+1}"
     )
-    # cleanup
     context.user_data.pop("variations", None)
     await update.callback_query.message.edit_reply_markup(None)
 
@@ -157,20 +159,18 @@ async def zip_spoof_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not doc.file_name.lower().endswith(".zip"):
         return await update.message.reply_text("❌ Please send me a .zip file.")
 
-    # Download ZIP
     in_buf = io.BytesIO()
     await doc.get_file().download(out=in_buf)
     in_buf.seek(0)
 
-    # Prepare output ZIP
     out_buf = io.BytesIO()
     with zipfile.ZipFile(in_buf, 'r') as zin, \
          zipfile.ZipFile(out_buf, 'w', zipfile.ZIP_DEFLATED) as zout:
         for name in zin.namelist():
             if name.endswith("/"):
                 continue
-            ext = name.lower().rsplit(".",1)[-1]
             data = zin.read(name)
+            ext = name.lower().rsplit(".",1)[-1]
             if ext in ("jpg","jpeg","png","bmp","tiff","gif"):
                 spoofed = generate_variations(data, variation_count=1)[0]
                 base = name.rsplit(".",1)[0]
@@ -179,21 +179,18 @@ async def zip_spoof_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 zout.writestr(name, data)
     out_buf.seek(0)
 
-    # Send back
-    return await update.message.reply_document(
+    await update.message.reply_document(
         document=out_buf,
         filename=f"spoofed_{doc.file_name}"
     )
 
 # --- Bot setup ---
-load_dotenv()  # local .env, ignored on Render if you set ENV VAR directly
+load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise RuntimeError("❌ BOT_TOKEN not set in environment")
 
-# Build application
 async def post_init(app):
-    # clear old commands & set /start
     await app.bot.delete_my_commands()
     await app.bot.set_my_commands([
         BotCommand("start", "Choose number of variations")
