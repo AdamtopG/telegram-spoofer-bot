@@ -3,7 +3,7 @@ import os, io, zipfile, random, logging
 import numpy as np
 from dotenv import load_dotenv
 from PIL import Image, ImageEnhance, ImageFilter
-from moviepy.editor import VideoFileClip
+import moviepy.editor as mpy
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand
 from telegram.ext import (
     ApplicationBuilder, ContextTypes, CommandHandler,
@@ -54,7 +54,7 @@ def spoof_video(input_bytes):
     with open("temp_input.mp4", "wb") as f:
         f.write(input_stream.read())
 
-    clip = VideoFileClip("temp_input.mp4").subclip(0, 10)
+    clip = mpy.VideoFileClip("temp_input.mp4").subclip(0, 10)
     clip = clip.resize(0.98).fx(lambda c: c.set_fps(24))
     clip.write_videofile("temp_output.mp4", codec="libx264", audio_codec="aac", bitrate="400k", logger=None)
 
