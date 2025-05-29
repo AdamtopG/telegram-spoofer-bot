@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: telegram-spoofer-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python spoof_bot.py
+    preBuildCommand: |
+      apt-get update && apt-get install -y ffmpeg
