@@ -1,6 +1,5 @@
 python-telegram-bot>=20.0
-pillow
-python-dotenv
+pillow>=9.1.0
+python-dotenv>=0.21.0
 numpy
 moviepy>=1.0.3
-
