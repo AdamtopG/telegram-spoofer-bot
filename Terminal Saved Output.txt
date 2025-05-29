@@ -1,0 +1,48 @@
+Last login: Tue May  6 14:11:29 on ttys000
+mac@MacBook-Air-6 ~ % cd ~/telegram-spoof-bot/telegram-spoof-bot
+mac@MacBook-Air-6 telegram-spoof-bot % touch .env
+
+mac@MacBook-Air-6 telegram-spoof-bot % nano .env
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  UW PICO 5.09                       File: .env                       Modified  
+
+BOT_TOKEN=8089313407:AAGjiyQ1chkHOMqfC3b4slX9jSV5Sz9DBw0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+^G Get Help  ^O WriteOut  ^R Read File ^Y Prev Pg   ^K Cut Text  ^C Cur Pos   
+^X Exit      ^J Justify   ^W Where is  ^V Next Pg   ^U UnCut Text^T To Spell  
