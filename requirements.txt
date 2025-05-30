@@ -1,4 +1,10 @@
 python-telegram-bot>=20.0
 pillow>=9.1.0
 python-dotenv>=0.21.0
-numpy
+numpy>=1.24.0
+moviepy>=1.0.3
+imageio>=2.31.0
+imageio-ffmpeg>=0.4.8
+# Additional dependencies for better video processing
+scipy>=1.10.0
+scikit-image>=0.21.0
