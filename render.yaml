@@ -1,0 +1,10 @@
+services:
+  - type: background
+    name: telegram-video-bot
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+    # For video processing, you might need more resources
+    plan: starter  # Consider upgrading for better performance
